@@ -22,7 +22,9 @@ let handle = Arc::new(EventWaitHandle::new());
 handle.signal()?;
 
 // Did someone signal us?
-handle.check()?;
+if handle.check()? {
+    println!("signal received");
+}
 
 // Wait for 5 seconds or until someone signals us.
 if handle.wait(Duration::from_secs(5))? {
