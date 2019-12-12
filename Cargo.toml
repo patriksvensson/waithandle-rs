@@ -1,0 +1,11 @@
+[package]
+name = "waithandle"
+version = "0.1.0"
+authors = ["Patrik Svensson <patrik@patriksvensson.se>"]
+description = "A library that makes signaling between threads more ergonomic."
+license = "MIT"
+repository = "https://github.com/patriksvensson/waithandle-rs"
+keywords = ["waithandle"]
+edition = "2018"
+
+[dependencies]
