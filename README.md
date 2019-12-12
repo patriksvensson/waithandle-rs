@@ -1,6 +1,6 @@
-# waithandle-rs
+# Waithandle
 
-A library that makes signaling between threads more ergonomic than using [Condvar][2] directly.
+A Rust library that makes signaling between threads more ergonomic than using [Condvar][2] directly.
 
 Inspired by the .NET [System.Threading.EventWaitHandle][1] API. 
 Uses [Condvar][2] and [Mutex][3] under the hood to block threads 
