@@ -1,9 +1,8 @@
 # Waithandle
 
-A Rust library that makes signaling between threads more ergonomic than using [Condvar][2] directly.
+A Rust library that makes signaling between threads a bit more ergonomic.
 
-Inspired by the .NET [System.Threading.EventWaitHandle][1] API. 
-Uses [Condvar][2] and [Mutex][3] under the hood to block threads 
+Uses [Condvar][1] and [Mutex][2] under the hood to block threads 
 without consuming CPU time.
 
 ## Usage
@@ -11,23 +10,20 @@ without consuming CPU time.
 ```rust
 use std::sync::Arc;
 use std::time::Duration;
-use waithandle::{EventWaitHandle, WaitHandle};
 
-// Create a handle and wrap it
-// in an Arc so we can share ownership
-// of it with another thread.
-let handle = Arc::new(EventWaitHandle::new());
+// Create the signaler and the listener
+let (signaler, listener) = waithandle::new();
 
-// Signal a thread.
-handle.signal()?;
+// Signal a thread
+signaler.signal()?;
 
 // Did someone signal us?
-if handle.check()? {
+if listener.check()? {
     println!("signal received");
 }
 
-// Wait for 5 seconds or until someone signals us.
-if handle.wait(Duration::from_secs(5))? {
+// Wait for 5 seconds or until someone signals us
+if listener.wait(Duration::from_secs(5))? {
     println!("signal received");
 }
 ```
@@ -39,18 +35,16 @@ if handle.wait(Duration::from_secs(5))? {
 ```
 
 ```
-[WORK] Doing some work...
-[WORK] Doing some work...
-[WORK] Doing some work...
-[WORK] Doing some work...
-[WORK] Doing some work...
-[WORK] Waiting...
-[MAIN] Signaling thread...
-[MAIN] Joining thread...
-[WORK] Someone told us to shut down!
-[MAIN] Done!
+Doing some work...
+Doing some work...
+Doing some work...
+Doing some work...
+Doing some work...
+Signaling thread...
+Joining thread...
+Someone told us to exit!
+Done!
 ```
 
-[1]: https://docs.microsoft.com/en-us/dotnet/api/system.threading.eventwaithandle?view=netframework-4.8
-[2]: https://doc.rust-lang.org/std/sync/struct.Condvar.html
-[3]: https://doc.rust-lang.org/std/sync/struct.Mutex.html
+[1]: https://doc.rust-lang.org/std/sync/struct.Condvar.html
+[2]: https://doc.rust-lang.org/std/sync/struct.Mutex.html

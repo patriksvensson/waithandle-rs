@@ -9,9 +9,9 @@ fn main() {
             while !listener.check().unwrap() {
                 println!("Doing some work...");
 
-                println!("Waiting...");
+                // Wait for 1 second or until we receive a signal
                 if listener.wait(Duration::from_secs(1)).unwrap() {
-                    println!("Someone told us to shut down!");
+                    println!("Someone told us to exit!");
                     break;
                 }
             }

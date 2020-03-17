@@ -13,9 +13,9 @@
 //! let thread = thread::spawn({
 //!     move || {
 //!         while !listener.check().unwrap() {
-//!             println!("Hello world!");
+//!             println!("Doing some work...");
 //!             if listener.wait(Duration::from_secs(1)).unwrap() {
-//!                 println!("Received a signal to bail!");
+//!                 println!("Someone told us to exit!");
 //!                 break;
 //!             }
 //!         }
@@ -24,7 +24,7 @@
 //!
 //! thread::sleep(Duration::from_secs(5));
 //!
-//! println!("Signalling thread...");
+//! println!("Signaling thread...");
 //! signaler.signal().unwrap();
 //! println!("Joining thread...");
 //! thread.join().unwrap();
