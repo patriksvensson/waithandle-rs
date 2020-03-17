@@ -1,21 +1,19 @@
-use std::sync::Arc;
+//use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
-use waithandle::{EventWaitHandle, WaitHandle, WaitHandleSignaler};
+use waithandle::{WaitHandle, WaitHandleSignaler};
 
 fn main() {
 
-    let handle = Arc::new(EventWaitHandle::new());
+    let (signaler, listener) = waithandle::make_pair();
     let thread = thread::spawn(
     {
-        let should_i_stop = handle.clone();
-
         move || {
-            while !should_i_stop.check().unwrap() {
+            while !listener.check().unwrap() {
                 println!("[WORK] Doing some work...");
 
                 println!("[WORK] Waiting...");
-                if should_i_stop.wait(std::time::Duration::from_secs(1)).unwrap() {
+                if listener.wait(std::time::Duration::from_secs(1)).unwrap() {
                     println!("[WORK] Someone told us to shut down!");
                     break;
                 }
@@ -29,7 +27,7 @@ fn main() {
     // Signal the thread to stop and 
     // then wait for the thread to join.
     println!("[MAIN] Signaling thread...");
-    handle.signal().unwrap();
+    signaler.signal().unwrap();
     println!("[MAIN] Joining thread...");
     thread.join().unwrap();
 
