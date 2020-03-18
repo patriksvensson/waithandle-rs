@@ -6,11 +6,9 @@ use std::time::Duration;
 fn waithandle() {
     let (signaler, listener) = waithandle::new();
     let thread = thread::spawn({
-        move || {
-            while !listener.check().unwrap() {
-                if listener.wait(Duration::from_secs(1)).unwrap() {
-                    break;
-                }
+        move || loop {
+            if listener.wait(Duration::from_secs(1)).unwrap() {
+                break;
             }
         }
     });

@@ -6,7 +6,7 @@ fn main() {
     let (signaler, listener) = waithandle::new();
     let thread = thread::spawn({
         move || {
-            while !listener.check().unwrap() {
+            loop {
                 println!("Doing some work...");
 
                 // Wait for 1 second or until we receive a signal

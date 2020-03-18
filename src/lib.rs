@@ -55,17 +55,14 @@ pub fn new() -> (WaitHandleSignaler, WaitHandleListener) {
 
 #[derive(Debug, Default)]
 struct WaitHandle {
-    mutex: Mutex<bool>,
-    cond: Condvar,
+    pair: Arc<(Mutex<bool>, Condvar)>,
 }
 
 impl WaitHandle {
     /// Creates a new wait handle.
     pub fn new() -> Self {
-        return WaitHandle {
-            mutex: Mutex::new(false),
-            cond: Condvar::new(),
-        };
+        let pair = Arc::new((Mutex::new(false), Condvar::new()));
+        return WaitHandle { pair };
     }
 
     pub fn check(&self) -> WaitHandleResult<bool> {
@@ -73,8 +70,9 @@ impl WaitHandle {
     }
 
     pub fn wait(&self, timeout: Duration) -> WaitHandleResult<bool> {
-        let mut guard = self.mutex.lock()?;
-        let result = self.cond.wait_timeout(guard, timeout)?;
+        let (lock, cvar) = &*self.pair;
+        let mut guard = lock.lock()?;
+        let result = cvar.wait_timeout_while(guard, timeout, |&mut pending| !pending)?;
         guard = result.0;
         if *guard {
             return Ok(true);
@@ -91,10 +89,11 @@ impl WaitHandle {
     }
 
     fn set(&self, value: bool) -> WaitHandleResult<()> {
-        let mut lock = self.mutex.lock()?;
-        if *lock != value {
-            *lock = value;
-            self.cond.notify_all();
+        let (lock, cvar) = &*self.pair;
+        let mut guard = lock.lock()?;
+        if *guard != value {
+            *guard = value;
+            cvar.notify_one();
         }
         Ok(())
     }
