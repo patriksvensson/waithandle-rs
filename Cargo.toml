@@ -1,6 +1,6 @@
 [package]
 name = "waithandle"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Patrik Svensson <patrik@patriksvensson.se>"]
 description = "A library that makes signaling between threads a bit more ergonomic."
 license = "MIT"
