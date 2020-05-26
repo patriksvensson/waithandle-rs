@@ -8,22 +8,21 @@ without consuming CPU time.
 ## Usage
 
 ```rust
-use std::sync::Arc;
 use std::time::Duration;
 
 // Create the signaler and the listener
 let (signaler, listener) = waithandle::new();
 
 // Signal a thread
-signaler.signal()?;
+signaler.signal();
 
 // Did someone signal us?
-if listener.check()? {
+if listener.check() {
     println!("signal received");
 }
 
 // Wait for 5 seconds or until someone signals us
-if listener.wait(Duration::from_secs(5))? {
+if listener.wait(Duration::from_secs(5)) {
     println!("signal received");
 }
 ```
