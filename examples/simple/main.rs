@@ -10,7 +10,7 @@ fn main() {
                 println!("Doing some work...");
 
                 // Wait for 1 second or until we receive a signal
-                if listener.wait(Duration::from_secs(1)).unwrap() {
+                if listener.wait(Duration::from_secs(1)) {
                     println!("Someone told us to exit!");
                     break;
                 }
@@ -23,7 +23,7 @@ fn main() {
 
     // Signal the thread to stop and then wait for the thread to join.
     println!("Signaling thread...");
-    signaler.signal().unwrap();
+    signaler.signal();
     println!("Joining thread...");
     thread.join().unwrap();
 

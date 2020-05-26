@@ -48,3 +48,9 @@ Done!
 
 [1]: https://doc.rust-lang.org/std/sync/struct.Condvar.html
 [2]: https://doc.rust-lang.org/std/sync/struct.Mutex.html
+
+## Running benchmarks
+
+```
+> cargo bench
+```

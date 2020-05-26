@@ -7,25 +7,30 @@
 //!
 //! ```rust
 //! use std::thread;
+//! use std::time::Duration;
 //!
 //! let (signaler, listener) = waithandle::new();
 //!
 //! let thread = thread::spawn({
 //!     move || {
-//!         while !listener.check().unwrap() {
+//!         while !listener.check() {
 //!             println!("Doing some work...");
-//!             if listener.wait(Duration::from_secs(1)).unwrap() {
-//!                 println!("Someone told us to exit!");
+//!
+//!             // Wait for 1 second or until we receive a signal
+//!             if listener.wait(Duration::from_secs(1)) {
+//!                 println!("Someone told us to quit!");
 //!                 break;
 //!             }
 //!         }
 //!     }
 //! });
 //!
+//! // Sleep for 5 seconds.
 //! thread::sleep(Duration::from_secs(5));
 //!
 //! println!("Signaling thread...");
-//! signaler.signal().unwrap();
+//! signaler.signal();
+//!
 //! println!("Joining thread...");
 //! thread.join().unwrap();
 //! ```
@@ -53,13 +58,12 @@ pub fn new() -> (WaitHandleSignaler, WaitHandleListener) {
 ///////////////////////////////////////////////////////////
 // Wait handle
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 struct WaitHandle {
     pair: Arc<(Mutex<bool>, Condvar)>,
 }
 
 impl WaitHandle {
-    /// Creates a new wait handle.
     pub fn new() -> Self {
         let pair = Arc::new((Mutex::new(false), Condvar::new()));
         return WaitHandle { pair };
@@ -103,7 +107,7 @@ impl WaitHandle {
 // Signaler
 
 /// The signaling half of a wait handle.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct WaitHandleSignaler {
     handle: Arc<WaitHandle>,
 }
@@ -113,11 +117,23 @@ impl WaitHandleSignaler {
         Self { handle }
     }
 
-    pub fn reset(&self) -> WaitHandleResult<()> {
+    /// Resets the wait handle
+    pub fn reset(&self) {
+        self.try_reset().expect("error occured while resetting wait handle")
+    }
+
+    /// Tries to reset the wait handle
+    pub fn try_reset(&self) -> WaitHandleResult<()> {
         self.handle.reset()
     }
 
-    pub fn signal(&self) -> WaitHandleResult<()> {
+    /// Signals the wait handle
+    pub fn signal(&self) {
+        self.try_signal().expect("error occured while signaling wait handle")
+    }
+
+    /// Tries to signal the wait handle
+    pub fn try_signal(&self) -> WaitHandleResult<()> {
         self.handle.signal()
     }
 }
@@ -126,7 +142,7 @@ impl WaitHandleSignaler {
 // Listener
 
 /// The listening half of a wait handle.
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct WaitHandleListener {
     handle: Arc<WaitHandle>,
 }
@@ -136,11 +152,25 @@ impl WaitHandleListener {
         Self { handle }
     }
 
-    pub fn check(&self) -> WaitHandleResult<bool> {
+    /// Checks whether or not the wait handle have been signaled.
+    pub fn check(&self) -> bool {
+        self.try_check().expect("an error occured while checking wait handle")
+    }
+
+    /// Tries checking whether or not the wait handle have been signaled.
+    pub fn try_check(&self) -> WaitHandleResult<bool> {
         self.handle.check()
     }
 
-    pub fn wait(&self, timeout: Duration) -> WaitHandleResult<bool> {
+    /// Waits until the wait handle have been signaled or the timeout occur,
+    /// whichever comes first.
+    pub fn wait(&self, timeout: Duration) -> bool {
+        self.try_wait(timeout).expect("an error occured while waiting for wait handle")
+    }
+
+    /// Tries waiting until the wait handle have been signaled or the timeout occur,
+    /// whichever comes first.
+    pub fn try_wait(&self, timeout: Duration) -> WaitHandleResult<bool> {
         self.handle.wait(timeout)
     }
 }

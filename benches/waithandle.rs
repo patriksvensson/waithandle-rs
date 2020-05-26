@@ -7,12 +7,12 @@ fn waithandle() {
     let (signaler, listener) = waithandle::new();
     let thread = thread::spawn({
         move || loop {
-            if listener.wait(Duration::from_secs(1)).unwrap() {
+            if listener.wait(Duration::from_secs(1)) {
                 break;
             }
         }
     });
-    signaler.signal().unwrap();
+    signaler.signal();
     thread.join().unwrap();
 }
 
